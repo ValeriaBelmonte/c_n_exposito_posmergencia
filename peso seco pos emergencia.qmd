@@ -1,0 +1,371 @@
+---
+title: "pos_emerg_peso-seco"
+format: html
+editor: visual
+---
+
+```{r librerias iniciales,  warning=FALSE, cache=FALSE, message=FALSE,echo=FALSE}
+#| label: setup
+#| message: false
+#| warning: false
+
+# Paquetes
+library(tidyverse)
+library(dplyr)
+library(readxl)
+library(glmmTMB)
+library(emmeans)
+library(flextable)
+```
+
+```{r}
+#|label: setup
+#| message: false
+#| warning: false
+peso<-data.table::data.table(
+        Tratamiento = c("Glifosato","Glifosato",
+                        "Glifosato","Glifosato","Glifosato","Glifosato",
+                        "Glifosato","Glifosato","2,4D","2,4D","2,4D","2,4D",
+                        "2,4D","2,4D","2,4D","2,4D","Dicamba","Dicamba",
+                        "Dicamba","Dicamba","Dicamba","Dicamba","Dicamba",
+                        "Dicamba","Imazetapir","Imazetapir","Imazetapir",
+                        "Imazetapir","Imazetapir","Imazetapir","Imazetapir",
+                        "Imazetapir","Clorimuron","Clorimuron","Clorimuron",
+                        "Clorimuron","Clorimuron","Clorimuron","Clorimuron",
+                        "Clorimuron","Testigo","Testigo","Testigo","Testigo","Testigo",
+                        "Testigo","Testigo","Testigo"),
+             Maceta = c(1L,2L,3L,4L,5L,6L,7L,
+                        8L,1L,2L,3L,4L,5L,6L,7L,8L,1L,2L,3L,4L,5L,
+                        6L,7L,8L,1L,2L,3L,4L,5L,6L,7L,8L,1L,2L,3L,
+                        4L,5L,6L,7L,8L,1L,2L,3L,4L,5L,6L,7L,8L),
+          Condicion = c("Sin estres","Sin estres",
+                        "Sin estres","Sin estres","Con estres","Con estres",
+                        "Con estres","Con estres","Sin estres","Sin estres",
+                        "Sin estres","Sin estres","Con estres","Con estres",
+                        "Con estres","Con estres","Sin estres","Sin estres",
+                        "Sin estres","Sin estres","Con estres","Con estres",
+                        "Con estres","Con estres","Sin estres","Sin estres",
+                        "Sin estres","Sin estres","Con estres","Con estres",
+                        "Con estres","Con estres","Sin estres","Sin estres",
+                        "Sin estres","Sin estres","Con estres","Con estres",
+                        "Con estres","Con estres","Sin estres","Sin estres",
+                        "Sin estres","Sin estres","Con estres","Con estres",
+                        "Con estres","Con estres"),
+             Numero = c(6L,4L,7L,6L,3L,9L,4L,
+                        3L,7L,4L,6L,6L,9L,3L,7L,6L,5L,4L,2L,3L,4L,
+                        4L,6L,5L,4L,6L,6L,6L,5L,8L,6L,5L,6L,4L,6L,
+                        4L,6L,3L,5L,6L,3L,7L,4L,5L,7L,8L,6L,7L),
+               Peso = c(0.0553,0.0337,0.1004,
+                        0.0957,0.0161,0.0413,0.0236,0.0312,0.0721,0.0351,
+                        0.0711,0.0986,0.0449,0.0253,0.036,0.0307,0.0393,0.0534,
+                        0.0442,0.058,0.0295,0.0252,0.0397,0.0483,0.0548,
+                        0.0724,0.0877,0.0971,0.0377,0.0351,0.0711,0.0419,
+                        0.0924,0.0575,0.1003,0.0552,0.0505,0.0284,0.041,
+                        0.0419,0.0494,0.0815,0.1109,0.0451,0.0473,0.0651,
+                        0.0324,0.0427)
+      )
+```
+
+```{r}
+library(dplyr)
+
+resumen <- peso %>%
+  group_by(Tratamiento, Condicion) %>%
+  summarise(
+    n = n(),
+       mediana =round(median(Peso, na.rm = TRUE),3) ,
+    media = round(mean(Peso, na.rm = TRUE),3),
+    sd = round(sd(Peso, na.rm = TRUE),3),
+    error_estandar = round(sd / sqrt(n),3),
+ 
+    min = min(Peso, na.rm = TRUE),
+    max = max(Peso, na.rm = TRUE)
+  )
+
+resumen
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(peso, aes(x = Tratamiento, y = Peso, color = Condicion, group = Condicion)) +
+  
+  # puntos (medias)
+  stat_summary(fun = mean, geom = "point", size = 3) +
+  
+  # líneas de interacción
+  stat_summary(fun = mean, geom = "line", linewidth = 1) +
+  
+  # barras de error (opcional pero MUY recomendable)
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  
+  labs(
+    title = "Gráfico de interacción: Condición × Tratamiento",
+    x = "Tratamiento",
+    y = "Peso promedio",
+    color = "Condición"
+  ) +
+  
+  theme_minimal() +
+  theme(
+    text = element_text(size = 12),
+    plot.title = element_text(face = "bold")
+  )
+```
+
+## Anova factorial
+
+```{r}
+modelo <- aov(Peso ~ Condicion * Tratamiento, data = peso)
+```
+
+```{r}
+summary(modelo)
+```
+
+### Supuestos
+
+### Normalidad
+
+```{r}
+res <- residuals(modelo)
+
+# Histograma
+hist(res)
+
+# QQ plot
+qqnorm(res)
+qqline(res)
+
+# Test de Shapiro
+shapiro.test(res)
+```
+
+
+Se cumple la normalidad
+
+## Homcedasticidad
+
+```{r}
+plot(modelo, 1)  # residuos vs ajustados
+```
+
+```{r}
+library(car)
+leveneTest(Peso ~ Tratamiento * Condicion, data = peso)
+```
+
+#### Falta de homocedasticidad
+
+El análisis gráfico de los residuos en función de los valores ajustados evidenció un patrón de dispersión creciente, indicando la presencia de heterocedasticidad. Por lo tanto, no se cumple el supuesto de homogeneidad de varianzas requerido por el ANOVA. tambien se obtiene un pvalore de 0.03117 en el test de hocedasticidad
+
+Se debe incorporar en el modelo
+
+## Modelo por medio de medio de gls
+
+### Solo varianza heterocedasticas en los tratamientos 
+
+```{r}
+library(nlme)
+
+modelo_gls <- gls(
+  Peso ~ Tratamiento * Condicion,
+  weights = varIdent(form = ~1 | Tratamiento),
+  data = peso
+)
+```
+
+```{r}
+summary(modelo_gls)
+anova(modelo_gls)
+```
+
+```{r}
+
+res <- residuals(modelo_gls, type = "normalized")
+fit <- fitted(modelo_gls)
+```
+```{r}
+plot(fit, res)
+abline(h = 0, col = "red")
+```
+
+```{r}
+qqnorm(res)
+qqline(res)
+
+shapiro.test(res)
+```
+###  
+
+### varianza heterocedasticas en los tratamientos y condición
+
+```{r}
+library(nlme)
+
+modelo_gls2 <- gls(
+  Peso ~ Tratamiento * Condicion,
+  weights = varIdent(form = ~1 | Tratamiento * Condicion),
+  data = peso
+)
+```
+
+```{r}
+summary(modelo_gls2)
+anova(modelo_gls2)
+```
+
+
+
+```{r}
+res2 <- residuals(modelo_gls2, type = "normalized")
+fit2 <- fitted(modelo_gls2)
+```
+
+```{r}
+plot(fit2, res2)
+abline(h = 0, col = "red")
+```
+
+```{r}
+qqnorm(res2)
+qqline(res2)
+
+shapiro.test(res2)
+```
+
+```{r}
+modelo_gls0 <- gls(
+  Peso ~ Tratamiento * Condicion,
+  data = peso
+)
+
+AIC(modelo_gls0, modelo_gls,modelo_gls2)
+```
+
+Aunque el model sin modelara varianza es sensiblemente mejor que los otros en función de AIC, se debe tener en cuenta la heterocedasticidad
+
+me quedo con el modelo con hetercedasticidad en los tratamientos, el modelo ajusta mejor
+
+El modelo tien un valor limite de p para tratamientos, por las dudas hago uno prueba de medias para tratamientos
+
+## Comparo medias
+
+```{r}
+library(emmeans)
+
+emm_trat <- emmeans(modelo_gls, ~ Tratamiento)
+emm_trat
+```
+
+```{r}
+pairs(emm_trat)
+```
+
+```{r}
+pairs(emm_trat, adjust = "tukey")
+```
+
+```{r}
+emm_df <- as.data.frame(emm_trat)
+
+library(ggplot2)
+
+ggplot(emm_df, aes(x = Tratamiento, y = emmean)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2) +
+  theme_minimal() +
+  labs(
+    y = "Peso medio estimado",
+    x = "Tratamiento"
+  )
+```
+
+```{r}
+emm_df <- as.data.frame(emm_trat)
+
+library(ggplot2)
+
+ggplot(emm_df, aes(x = Tratamiento, y = emmean)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2) +
+  theme_minimal() +
+  labs(
+    y = "Peso medio estimado",
+    x = "Tratamiento"
+  )
+```
+
+```{r}
+pairs(emm_trat, adjust = "bonferroni")
+```
+
+```{r}
+
+pairs(emm_trat, adjust = "none")
+```
+
+```{r}
+
+
+pairs(emm_trat, adjust = "holm")
+```
+
+```{r}
+
+pairs(emm_trat, adjust = "BH")
+
+```
+
+Dunnet
+
+```{r}
+emmeans(modelo_gls, ~ Tratamiento) %>%
+  contrast(method = "trt.vs.ctrl", ref = "Testigo")
+```
+
+## Conclusión estadística
+
+El modelo de mínimos cuadrados generalizados evidenció que la condición tuvo un efecto significativo sobre el peso seco medio (p \< 0.0001). No se detectó interacción significativa entre tratamiento y condición (p = 0.3419), ni efecto del tratamiento sobre la variable en estudio (p = 0.0507)
+
+## Modelo con glmm
+
+Incluyo la varainza en el modelo
+
+```{r}
+library(glmmTMB)
+
+modelo_glm <- glmmTMB(Peso ~ Tratamiento * Condicion,
+                     family = gaussian(),
+                     data = peso)
+```
+
+```{r}
+summary(modelo_glm)
+```
+
+```{r}
+car::Anova(modelo_glm, type = 3)
+```
+
+```{r}
+library(emmeans)
+
+emmeans(modelo_glm, ~ Tratamiento * Condicion)
+pairs(emmeans(modelo_glm, ~ Tratamiento | Condicion))
+```
+
+```{r}
+library(DHARMa)
+
+res <- simulateResiduals(modelo_glm)
+plot(res)
+```
+
+interpreación ks test p=0.987, no hay problema con los residuos dispersión p=0.88 no hay heterocedasticidad detectada Outlier test: p = 1 no hay valores atipocos detectados
+
+El diagnóstico de residuos mediante el paquete DHARMa no evidenció desviaciones significativas respecto a los supuestos del modelo. Los residuos presentaron una distribución uniforme (KS test, p = 0.987), sin problemas de dispersión (p = 0.88) ni valores atípicos influyentes (p = 1). Asimismo, no se observaron patrones sistemáticos en función de los valores predichos. En conjunto, estos resultados indican un adecuado ajuste del modelo.
+
+### Conclusión estadística:
+
+El análisis mediante un modelo lineal generalizado mostró que no existe efecto de interacción significativa entre tratamiento y condición sobre el peso promedia (p = 0.559), lo que indica que el efecto del tratamiento es consistente entre condiciones. El factor tratamiento no presentó efectos significativos sobre la variable peso (p = 0.563). En cambio, la condición experimental tuvo un efecto significativo sobre el peso (p = 0.003), evidenciando diferencias entre sus niveles.
