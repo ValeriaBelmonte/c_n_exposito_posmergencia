@@ -141,7 +141,6 @@ qqline(res)
 shapiro.test(res)
 ```
 
-
 Se cumple la normalidad
 
 ## Homcedasticidad
