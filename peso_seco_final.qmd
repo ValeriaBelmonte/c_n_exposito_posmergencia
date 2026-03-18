@@ -341,7 +341,7 @@ El modelo de mínimos cuadrados generalizados evidenció que la condición tuvo 
 ## Modelo con glmm
 
 Incluyo la varainza en el modelo
-=======
+
 El análisis gráfico de los residuos en función de los valores ajustados evidenció un patrón de dispersión creciente, indicando la presencia de heterocedasticidad. Por lo tanto, no se cumple el supuesto de homogeneidad de varianzas requerido por el ANOVA.
 tambien se obtiene un pvalore de 0.03117  en el test de hocedasticidad 
 
@@ -378,7 +378,7 @@ library(DHARMa)
 res <- simulateResiduals(modelo_glm)
 plot(res)
 ```
-<<<<<<< HEAD
+
 
 interpreación ks test p=0.987, no hay problema con los residuos dispersión p=0.88 no hay heterocedasticidad detectada Outlier test: p = 1 no hay valores atipocos detectados
 
@@ -387,7 +387,7 @@ El diagnóstico de residuos mediante el paquete DHARMa no evidenció desviacione
 ### Conclusión estadística:
 
 El análisis mediante un modelo lineal generalizado mostró que no existe efecto de interacción significativa entre tratamiento y condición sobre el peso promedia (p = 0.559), lo que indica que el efecto del tratamiento es consistente entre condiciones. El factor tratamiento no presentó efectos significativos sobre la variable peso (p = 0.563). En cambio, la condición experimental tuvo un efecto significativo sobre el peso (p = 0.003), evidenciando diferencias entre sus niveles.
-=======
+
 interpreación 
 ks test p=0.987, no hay problema con los residuos 
 dispersión p=0.88  no  hay heterocedasticidad detectada
