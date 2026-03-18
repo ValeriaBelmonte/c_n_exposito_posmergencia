@@ -124,10 +124,10 @@ ggplot(peso, aes(x = Tratamiento, y = Peso, color = Condicion, group = Condicion
     plot.title = element_text(face = "bold")
   )
 ```
-
+<<<<<<< HEAD
 
 ## Anova factorial
-
+=======
 
 
 ```{r}
