@@ -1,4 +1,27 @@
-.Rproj.user
+# Carpetas de Quarto / RMarkdown
+*_files/
+
+# Archivos temporales de R
 .Rhistory
 .RData
-.Ruserdata
+.Rproj.user/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos intermedios
+*.log
+*.aux
+*.out
+# Datos
+datos/
+
+# Outputs de Quarto
+*_files/
+*.html
+
+# Gráficos
+graficos/
+*.png
+*.jpg
