@@ -1,12 +1,8 @@
 ---
-title: "pos_emerg_peso-seco"
+title: "peso seco final"
 format: html
 editor: visual
 ---
-
-
-
-
 
 ```{r librerias iniciales,  warning=FALSE, cache=FALSE, message=FALSE,echo=FALSE}
 #| label: setup
@@ -408,10 +404,6 @@ El análisis mediante un modelo lineal generalizado mostró que no existe efecto
 El factor tratamiento no presentó efectos significativos sobre la variable peso (p = 0.563).
 
 En cambio, la condición experimental tuvo un efecto significativo sobre el peso (p = 0.003), evidenciando diferencias entre sus niveles.
-
-
-
-
 
 
 
